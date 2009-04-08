@@ -28,6 +28,7 @@
  */
 package pl.graniec.coralreef.network.chat.server;
 
+import pl.graniec.coralreef.network.PacketListener;
 import pl.graniec.coralreef.network.server.RemoteClient;
 
 /**
@@ -46,5 +47,24 @@ public class User {
 	protected User(ChatServer server, RemoteClient client) {
 		this.server = server;
 		this.client = client;
+		
+		// FIXME: Check if first packet is lost when I'll put a sleep here
+		
+		client.addPacketListener(new PacketListener() {
+			public void packetReceiver(Object data) {
+				handlePacket(data);
+			}
+		});
+	}
+	
+	/**
+	 * @return the name
+	 */
+	public String getName() {
+		return name;
+	}
+	
+	private void handlePacket(Object data) {
+		// TODO: Chat packets handling
 	}
 }
