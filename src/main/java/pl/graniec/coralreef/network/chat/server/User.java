@@ -28,7 +28,15 @@
  */
 package pl.graniec.coralreef.network.chat.server;
 
+import java.io.NotSerializableException;
+import java.util.Iterator;
+
 import pl.graniec.coralreef.network.PacketListener;
+import pl.graniec.coralreef.network.chat.packets.ChatPacket;
+import pl.graniec.coralreef.network.chat.packets.RegisterRejectReason;
+import pl.graniec.coralreef.network.chat.packets.UserRegisterRequest;
+import pl.graniec.coralreef.network.chat.packets.UserRegisterResponse;
+import pl.graniec.coralreef.network.exceptions.NetworkException;
 import pl.graniec.coralreef.network.server.RemoteClient;
 
 /**
@@ -37,6 +45,9 @@ import pl.graniec.coralreef.network.server.RemoteClient;
  *
  */
 public class User {
+	
+	private final static String NAME_EXPRESSION = "^[a-zA-Z0-9_-\\.]+$";
+	
 	/** Chat Server that this client is connected to */
 	private final ChatServer server;
 	/** RemoteClient of this user */
@@ -65,6 +76,75 @@ public class User {
 	}
 	
 	private void handlePacket(Object data) {
-		// TODO: Chat packets handling
+		if (!(data instanceof ChatPacket)) {
+			return;
+		}
+		
+		Class dataClass = data.getClass();
+		
+		if (dataClass == UserRegisterRequest.class) {
+			handleUserRegisterRequest((UserRegisterRequest)data);
+		}
+	}
+
+	private void handleUserRegisterRequest(UserRegisterRequest data) {
+		
+		String wantedName = data.getName();
+		boolean found = false;
+
+		try {
+			
+			// TODO: Do the version check
+			
+			// check if name is legal
+			if (!wantedName.matches(NAME_EXPRESSION)) {
+				client.send(
+						new UserRegisterResponse(
+								false,
+								RegisterRejectReason.IllegalUserName
+						)
+				);
+				return;
+			}
+			
+			// check if name is free
+			synchronized (server.users) {
+				for (Iterator itor = server.users.values().iterator(); itor.hasNext(); ) {
+					User user = (User) itor.next();
+					
+					if (wantedName.equals(((User)user).name)) {
+						found = true;
+						break;
+					}
+					
+				}
+				
+				if (found) {
+					// name already in use
+					client.send(
+							new UserRegisterResponse(
+									false,
+									RegisterRejectReason.UserNameAlreadyInUse
+							)
+					);
+					return;
+				}
+				
+				// accept
+				name = wantedName;
+				
+				client.send(
+						new UserRegisterResponse(
+								true,
+								(byte) 0
+						)
+				);
+			}
+			
+		} catch (NotSerializableException e) {
+			e.printStackTrace();
+		} catch (NetworkException e) {
+			// disconnected? I cannot do anything about it
+		}
 	}
 }

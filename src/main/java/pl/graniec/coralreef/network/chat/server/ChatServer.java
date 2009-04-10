@@ -77,7 +77,7 @@ public class ChatServer {
 	private final boolean standalone;
 	
 	/** Map of connected users: RemoteClient => User */
-	private final Map users = new HashMap();
+	protected final Map users = new HashMap();
 	
 	/** Connection listener */
 	private ConnectionListener connectionListener;
