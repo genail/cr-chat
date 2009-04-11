@@ -26,18 +26,75 @@
  * ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
  * POSSIBILITY OF SUCH DAMAGE.
  */
-package pl.graniec.coralreef.network.chat.packets;
+package pl.graniec.coralreef.network.chat.server;
+
+import java.util.HashSet;
+import java.util.Set;
 
 /**
- * Response for {@link RoomJoinRequest}.
+ * Group is a group of users. It helps to send message to multiple
+ * of chat users at once but not to everyone.
+ * <p>
+ * Every group has its name and this name is a group ID.
  * 
  * @author Piotr Korzuszek <piotr.korzuszek@gmail.com>
  *
  */
-public class RoomJoinResponse extends AbstractResponse {
-
-	public RoomJoinResponse(boolean succeed, byte failReason) {
-		super(succeed, failReason);
+public class Group {
+	/** The group ID */
+	private final String name;
+	/** Group members */
+	private final Set members = new HashSet();
+	
+	public Group(String name) {
+		super();
+		this.name = name;
 	}
-
+	
+	/**
+	 * Adds a new member to the group.
+	 * 
+	 * @return <code>false</code> if this user is already
+	 * a member of this group. 
+	 */
+	public boolean addMember(User u) {
+		synchronized (members) {
+			return members.add(u);
+		}
+	}
+	
+	/**
+	 * Removes member from the group.
+	 * 
+	 * @return <code>false</code> if this user isn't a member
+	 * of this group.
+	 */
+	public boolean removeMember(User u) {
+		synchronized (members) {
+			return members.remove(u);
+		}
+	}
+	
+	/**
+	 * @return Members count.
+	 */
+	public int size() {
+		return members.size();
+	}
+	
+	/**
+	 * @return Array of all members of this group.
+	 */
+	public User[] getMembers() {
+		synchronized (members) {
+			return (User[]) members.toArray(new User[members.size()]);
+		}
+	}
+	
+	/**
+	 * @return the name
+	 */
+	public String getName() {
+		return name;
+	}
 }

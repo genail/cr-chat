@@ -34,9 +34,9 @@ package pl.graniec.coralreef.network.chat.packets;
  */
 public final class MessageType {
 
-	public static final byte UserToRoom = 1;
-	public static final byte RoomToUser = 2;
-	public static final byte UserToUser = 3;
-	public static final byte RoomToRoom = 4;
+	public static final byte Public = 1;
+	public static final byte Private = 2;
+	public static final byte Group = 3;
+	public static final byte System = 4;
 	
 }

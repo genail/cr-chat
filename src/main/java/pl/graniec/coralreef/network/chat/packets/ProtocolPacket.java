@@ -33,76 +33,41 @@ import java.io.ObjectInput;
 import java.io.ObjectOutput;
 
 /**
- * This packet is sent from client to server when user wants
- * to join a room.
- * <p>
- * If you'll try to join room that you're already in then
- * you'll receive positive response, but nothing in fact
- * will happend.
+ * First packet sent from server to client. Tell what version
+ * of chat protocol it is using.
  * 
  * @author Piotr Korzuszek <piotr.korzuszek@gmail.com>
  *
  */
-public class RoomJoinRequest implements ChatPacket {
+public class ProtocolPacket implements ChatPacket {
 
-	/** Unique name of the room to join */
-	private String roomName;
-	/** Password to join the room */
-	private String password;
+	/** Protocol version */
+	private int version;
+	
+	public ProtocolPacket(int version) {
+		super();
+		this.version = version;
+	}
 	
 	/**
-	 * Creates a room join request with <code>roomName</code> and
-	 * its <code>password</code>.
-	 * <p>
-	 * Not every room has a password. You can pass a <code>null</code>
-	 * or empty string as a <code>password</code>, and this will
-	 * mean that there is no password provided.
-	 * 
-	 * @param roomName Name of room to join.
-	 * @param password Password to join the room. Can be <code>null</code> or empty.
+	 * @return the protocol version
 	 */
-	public RoomJoinRequest(String roomName, String password) {
-		
-		this.roomName = roomName;
-		
-		if (password == null) {
-			password = "";
-		} else {
-			this.password = password;
-		}
+	public int getVersion() {
+		return version;
 	}
 
-	/**
-	 * Provides the password to join a room. If there is no password
-	 * then an empty String will be returned.
-	 * 
-	 * @return the password.
-	 */
-	public String getPassword() {
-		return password;
-	}
-	
-	/**
-	 * @return the roomName that user wants to join
-	 */
-	public String getRoomName() {
-		return roomName;
-	}
-	
 	/*
 	 * @see java.io.Externalizable#readExternal(java.io.ObjectInput)
 	 */
 	public void readExternal(ObjectInput in) throws IOException, ClassNotFoundException {
-		roomName = in.readUTF();
-		password = in.readUTF();
+		version = in.readInt();
 	}
 
 	/*
 	 * @see java.io.Externalizable#writeExternal(java.io.ObjectOutput)
 	 */
 	public void writeExternal(ObjectOutput out) throws IOException {
-		out.writeUTF(roomName);
-		out.writeUTF(password);
+		out.writeInt(version);
 	}
 
 }

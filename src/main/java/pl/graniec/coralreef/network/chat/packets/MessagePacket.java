@@ -35,33 +35,31 @@ import java.io.ObjectOutput;
 /**
  * Packet sent from client to server when w user want to say
  * something and from server to client when a message to user
- * or the user's room is appeared.
+ * or the user's group is appeared.
  * <p>
  * There are four types of message:
  * <ul>
- * <li>user to room</li>
- * <li>room to user</li>
- * <li>user to user</li>
- * <li>room to room</li>
+ * <li>public</li>
+ * <li>private</li>
+ * <li>group</li>
+ * <li>system</li>
  * </ul>
  * 
- * The first one <b>user to room</b> is most basic one.
- * When room user wants to tell something to everyone
- * present in the place then this is the right type
- * of message to send.
+ * The first one <b>public</b> is most basic one.
+ * This message is sent to all chat server users.
  * 
  * <p>
- * The second one <b>room to user</b> is used when
- * a system message (from room) is sent to one user.
+ * The second one <b>private</b> is used when
+ * a user want to send message directly and only to
+ * one specified user.
  * 
  * <p>
- * The third one <b>user to user</b> is so-called private
- * message. Used when message should be read by one selected
- * person.
+ * The third one <b>group</b> is message sent to multiple
+ * of users that are members of specified group.
  * 
  * <p>
- * The last one is <b>room to room</b>. Is used when a
- * system message is sent to all (room) users.
+ * The last one is <b>system</b> message. Sent when server
+ * wants to tell you something.
  * 
  * @author Piotr Korzuszek <piotr.korzuszek@gmail.com>
  *

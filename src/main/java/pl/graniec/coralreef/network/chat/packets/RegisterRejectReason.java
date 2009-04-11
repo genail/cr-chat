@@ -37,5 +37,6 @@ public final class RegisterRejectReason {
 	public static final byte UserNameAlreadyInUse = 1;
 	public static final byte VersionMismatch      = 2;
 	public static final byte IllegalUserName      = 3;
+	public static final byte WrongPassword        = 4;
 	
 }

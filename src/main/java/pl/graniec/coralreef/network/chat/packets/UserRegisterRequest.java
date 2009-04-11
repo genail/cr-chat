@@ -43,6 +43,8 @@ public class UserRegisterRequest implements ChatPacket {
 
 	/** Name (nickname) of user that want to register */
 	private String name;
+	/** Password to join. Empty means no password */
+	private String password;
 	
 	public UserRegisterRequest(String name) {
 		this.name = name;

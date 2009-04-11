@@ -29,18 +29,11 @@
 package pl.graniec.coralreef.network.chat.server;
 
 import java.io.NotSerializableException;
-import java.util.HashMap;
 import java.util.Iterator;
-import java.util.Map;
 
 import pl.graniec.coralreef.network.PacketListener;
 import pl.graniec.coralreef.network.chat.packets.ChatPacket;
-import pl.graniec.coralreef.network.chat.packets.JoinRejectReason;
-import pl.graniec.coralreef.network.chat.packets.MessagePacket;
-import pl.graniec.coralreef.network.chat.packets.MessageType;
 import pl.graniec.coralreef.network.chat.packets.RegisterRejectReason;
-import pl.graniec.coralreef.network.chat.packets.RoomJoinRequest;
-import pl.graniec.coralreef.network.chat.packets.RoomJoinResponse;
 import pl.graniec.coralreef.network.chat.packets.UserRegisterRequest;
 import pl.graniec.coralreef.network.chat.packets.UserRegisterResponse;
 import pl.graniec.coralreef.network.exceptions.NetworkException;
@@ -61,8 +54,13 @@ public class User {
 	private final RemoteClient client;
 	/** User's name */
 	private String name;
-	/** Rooms that user is in: String => Room */
-	private final Map rooms = new HashMap();
+
+	// for testing purposes
+	User(String name) {
+		server = null;
+		client = null;
+		this.name = name;
+	}
 	
 	protected User(ChatServer server, RemoteClient client) {
 		this.server = server;
@@ -94,63 +92,6 @@ public class User {
 		if (dataClass == UserRegisterRequest.class) {
 			handleUserRegisterRequest((UserRegisterRequest) data);
 		} 
-		else if (dataClass == RoomJoinRequest.class) {
-			handleRoomJoinRequest((RoomJoinRequest) data);
-		}
-	}
-
-	private void handleRoomJoinRequest(RoomJoinRequest data) {
-		final String roomName = data.getRoomName();
-		final String password = data.getPassword();
-		
-		try {
-		
-			if (!rooms.containsKey(roomName)) {
-				// not in this room
-				synchronized (server.rooms) {
-					
-					final Room room = (Room) server.rooms.get(roomName);
-					
-					if (room == null) {
-						// room doesn't exist
-						client.send(
-								new RoomJoinResponse(
-										false,
-										JoinRejectReason.DoNotExists
-								)
-						);
-						
-						return;
-					}
-					
-					
-					if (!room.getPassword().equals(password)) {
-						// wrong password or needed password
-						client.send(
-								new RoomJoinResponse(
-										false,
-										(password.isEmpty() ? JoinRejectReason.PasswordNeeded : JoinRejectReason.WrongPassword)
-								)
-						);
-						
-						return;
-					}
-					
-					joinTo(room);
-					
-				}
-			}
-		
-		} catch (NotSerializableException e) {
-			e.printStackTrace();
-		} catch (NetworkException e) {
-			// disconnected? I cannot do anything about it
-		}
-	}
-
-	private void joinTo(Room room) {
-		rooms.put(room.getName(), room);
-		room.joinUser(this);
 	}
 
 	private void handleUserRegisterRequest(UserRegisterRequest data) {
@@ -214,7 +155,4 @@ public class User {
 		}
 	}
 
-	public void notifyUserJoined(Room room, User user) {
-		// TODO: not finished
-	}
 }

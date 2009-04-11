@@ -26,48 +26,67 @@
  * ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
  * POSSIBILITY OF SUCH DAMAGE.
  */
-package pl.graniec.coralreef.network.chat.packets;
+package pl.graniec.coralreef.network.chat.server;
 
-import java.io.IOException;
-import java.io.ObjectInput;
-import java.io.ObjectOutput;
+import junit.framework.TestCase;
 
 /**
- * This packet is sent from client to server when user wants
- * to left the room that he is in. This packet has no corresponding
- * response packet.
- * 
  * @author Piotr Korzuszek <piotr.korzuszek@gmail.com>
  *
  */
-public class RoomLeaveRequest implements ChatPacket {
+public class GroupTest extends TestCase {
+
+	final Group group = new Group("group");
+	final User user1 = new User("jack");
+	final User user2 = new User("john");
 	
-	/** Room to leave */
-	private String roomName;
-	
-	public RoomLeaveRequest(String roomName) {
-		this.roomName = roomName;
+	/*
+	 * @see junit.framework.TestCase#setUp()
+	 */
+	protected void setUp() throws Exception {
+		super.setUp();
 	}
-	
+
+	/*
+	 * @see junit.framework.TestCase#tearDown()
+	 */
+	protected void tearDown() throws Exception {
+		super.tearDown();
+	}
+
 	/**
-	 * @return the roomName
+	 * Test method for {@link pl.graniec.coralreef.network.chat.server.Group#addMember(pl.graniec.coralreef.network.chat.server.User)}.
 	 */
-	public String getRoomName() {
-		return roomName;
+	public void testAddMember() {
+		assertTrue(group.addMember(user1));
+		assertFalse(group.addMember(user1));
+		assertTrue(group.addMember(user2));
+		assertFalse(group.addMember(user2));
 	}
 
-	/*
-	 * @see java.io.Externalizable#readExternal(java.io.ObjectInput)
+	/**
+	 * Test method for {@link pl.graniec.coralreef.network.chat.server.Group#removeMember(pl.graniec.coralreef.network.chat.server.User)}.
 	 */
-	public void readExternal(ObjectInput in) throws IOException, ClassNotFoundException {
-		roomName = in.readUTF();
+	public void testRemoveMember() {
+		
+		assertFalse(group.removeMember(user1));
+		
+		group.addMember(user1);
+		group.addMember(user2);
+		
+		assertTrue(group.removeMember(user1));
+		assertFalse(group.removeMember(user1));
+		assertTrue(group.removeMember(user2));
 	}
 
-	/*
-	 * @see java.io.Externalizable#writeExternal(java.io.ObjectOutput)
+	/**
+	 * Test method for {@link pl.graniec.coralreef.network.chat.server.Group#getMembers()}.
 	 */
-	public void writeExternal(ObjectOutput out) throws IOException {
-		out.writeUTF(roomName);
+	public void testGetMembers() {
+		assertEquals(0, group.getMembers().length);
+		
+		group.addMember(user1);
+		assertEquals(user1, group.getMembers()[0]);
 	}
 
 }
