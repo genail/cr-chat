@@ -35,6 +35,10 @@ import java.io.ObjectOutput;
 /**
  * This packet is sent from client to server when user wants
  * to join a room.
+ * <p>
+ * If you'll try to join room that you're already in then
+ * you'll receive positive response, but nothing in fact
+ * will happend.
  * 
  * @author Piotr Korzuszek <piotr.korzuszek@gmail.com>
  *

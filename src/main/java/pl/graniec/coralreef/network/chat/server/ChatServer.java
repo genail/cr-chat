@@ -78,6 +78,8 @@ public class ChatServer {
 	
 	/** Map of connected users: RemoteClient => User */
 	protected final Map users = new HashMap();
+	/** Map of all rooms: String => Room */
+	protected final Map rooms = new HashMap();
 	
 	/** Connection listener */
 	private ConnectionListener connectionListener;

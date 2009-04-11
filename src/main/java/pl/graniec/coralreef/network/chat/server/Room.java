@@ -29,6 +29,7 @@
 package pl.graniec.coralreef.network.chat.server;
 
 import java.util.HashSet;
+import java.util.Iterator;
 import java.util.Set;
 
 /**
@@ -172,6 +173,36 @@ public class Room {
 			this.password = "";
 		} else {
 			this.password = password;
+		}
+	}
+
+	public void joinUser(User user) {
+		synchronized (users) {
+			if (users.add(user)) {
+				notifyUserJoined(user);
+			}
+		}
+	}
+
+	/**
+	 * Notifies about new user in room all current
+	 * users expect the joining user.
+	 */
+	private void notifyUserJoined(User user) {
+		synchronized (users) {
+			
+			User u;
+			for (Iterator itor = users.iterator(); itor.hasNext(); ) {
+				
+				u = (User) itor.next();
+				
+				if (u == user) {
+					continue;
+				}
+				
+				u = (User) itor.next();
+				u.notifyUserJoined(this, user);
+			}
 		}
 	}
 	
