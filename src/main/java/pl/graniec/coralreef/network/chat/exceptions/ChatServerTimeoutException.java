@@ -26,16 +26,29 @@
  * ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
  * POSSIBILITY OF SUCH DAMAGE.
  */
-package pl.graniec.coralreef.network.chat.packets;
+package pl.graniec.coralreef.network.chat.exceptions;
 
 /**
  * @author Piotr Korzuszek <piotr.korzuszek@gmail.com>
  *
  */
-public final class RegisterRejectReason {
-	
-	public static final byte UserNameAlreadyInUse = 1;
-	public static final byte IllegalUserName      = 2;
-	public static final byte WrongPassword        = 3;
-	
+public class ChatServerTimeoutException extends ChatException {
+
+	private static final long serialVersionUID = -7410510030324088005L;
+
+	public ChatServerTimeoutException() {
+	}
+
+	public ChatServerTimeoutException(String message) {
+		super(message);
+	}
+
+	public ChatServerTimeoutException(Throwable cause) {
+		super(cause);
+	}
+
+	public ChatServerTimeoutException(String message, Throwable cause) {
+		super(message, cause);
+	}
+
 }

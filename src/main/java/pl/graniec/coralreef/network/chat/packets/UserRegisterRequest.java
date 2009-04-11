@@ -46,8 +46,9 @@ public class UserRegisterRequest implements ChatPacket {
 	/** Password to join. Empty means no password */
 	private String password;
 	
-	public UserRegisterRequest(String name) {
+	public UserRegisterRequest(String name, String password) {
 		this.name = name;
+		this.password = password;
 	}
 	
 	/**
@@ -56,12 +57,20 @@ public class UserRegisterRequest implements ChatPacket {
 	public String getName() {
 		return name;
 	}
+	
+	/**
+	 * @return the password
+	 */
+	public String getPassword() {
+		return password;
+	}
 
 	/*
 	 * @see java.io.Externalizable#readExternal(java.io.ObjectInput)
 	 */
 	public void readExternal(ObjectInput in) throws IOException, ClassNotFoundException {
 		name = in.readUTF();
+		password = in.readUTF();
 	}
 
 	/*
@@ -69,6 +78,7 @@ public class UserRegisterRequest implements ChatPacket {
 	 */
 	public void writeExternal(ObjectOutput out) throws IOException {
 		out.writeUTF(name);
+		out.writeUTF(password);
 	}
 
 }

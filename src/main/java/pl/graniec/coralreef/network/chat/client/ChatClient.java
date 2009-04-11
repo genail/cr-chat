@@ -28,11 +28,22 @@
  */
 package pl.graniec.coralreef.network.chat.client;
 
-import javax.naming.Name;
+
+import java.io.NotSerializableException;
+import java.util.logging.Logger;
 
 import pl.graniec.coralreef.network.PacketListener;
+import pl.graniec.coralreef.network.chat.Protocol;
 import pl.graniec.coralreef.network.chat.exceptions.ChatException;
+import pl.graniec.coralreef.network.chat.exceptions.ChatServerTimeoutException;
+import pl.graniec.coralreef.network.chat.exceptions.IllegalUserNameException;
+import pl.graniec.coralreef.network.chat.exceptions.ProtocolVersionMismatchException;
+import pl.graniec.coralreef.network.chat.exceptions.UserNameAlreadyInUseException;
+import pl.graniec.coralreef.network.chat.exceptions.WrongPasswordExcepion;
 import pl.graniec.coralreef.network.chat.packets.ProtocolPacket;
+import pl.graniec.coralreef.network.chat.packets.RegisterRejectReason;
+import pl.graniec.coralreef.network.chat.packets.UserRegisterRequest;
+import pl.graniec.coralreef.network.chat.packets.UserRegisterResponse;
 import pl.graniec.coralreef.network.client.Client;
 import pl.graniec.coralreef.network.exceptions.NetworkException;
 
@@ -41,18 +52,29 @@ import pl.graniec.coralreef.network.exceptions.NetworkException;
  *
  */
 public class ChatClient {
+	
+	private static class ObjectContainer {
+		Object object;
+	}
+	
+	private static final Logger logger = Logger.getLogger(ChatClient.class.getName());
+	
+	/** Time to wait for response from server */
+	private static final int ANSWER_TIMEOUT = 30000;
+	
 	/** Network client implementation */
 	private final Client client;
 	/** Name of the chat user */
 	private String name;
 	
-	public ChatClient(Client client, Name name) {
+	public ChatClient(Client client, String name) {
 		
 		if (client == null || name == null || name.isEmpty()) {
 			throw new IllegalArgumentException("params cannot be null/empty");
 		}
 		
 		this.client = client;
+		this.name = name;
 	}
 	
 	public void connect(String host, int port) throws NetworkException, ChatException {
@@ -64,33 +86,112 @@ public class ChatClient {
 			password = "";
 		}
 		
-		final ProtocolPacket[] protocolPacketContainer = new ProtocolPacket[1];
-		protocolPacketContainer[0] = null;
+		final ObjectContainer objContainer = new ObjectContainer();
 
-		client.addPacketListener(new PacketListener() {
-
+		final PacketListener listener = new PacketListener() {
 			public void packetReceiver(Object data) {
-				protocolPacketContainer[0] = (ProtocolPacket) data;
+				
+				if (!(data instanceof ProtocolPacket)) {
+					logger.warning("Got trash from server: " + data.getClass().getName());
+					return;
+				}
+				
+				objContainer.object = data;
+				
 				synchronized (this) {
 					notify();
 				}
 			}
+		};
+		
+		client.addPacketListener(listener);
+		
+		try {
+		
+			client.connect(host, port);
 			
-		});
-		
-		client.connect(host, port);
-		
-		// wait for protocol packet
-		synchronized (this) {
-			try {
-				wait(30000);
-				// FIXME: throw connection timeout
-			} catch (InterruptedException e) {
-				// FIXME: finished here: got response
+			// wait for protocol packet
+			synchronized (this) {
+				wait(ANSWER_TIMEOUT);
 			}
+			
+			throw new ChatServerTimeoutException("chat server didn't respond in time");
+					
+					
+		} catch (InterruptedException e) {
+			// got packet
+		} finally {
+			client.removePacketListener(listener);
 		}
+
+		final ProtocolPacket protocolPacket = (ProtocolPacket) objContainer.object;
+		
+		if (protocolPacket.getVersion() != Protocol.VERSION) {
+			throw new ProtocolVersionMismatchException(
+					"server protocol version (" + protocolPacket.getVersion() +
+					") differs from client's one (" + Protocol.VERSION + ")"
+			);
+		}
+		
+		registerUser(name, password);
+		
 	}
 	
+	private void registerUser(String name, String password) throws NetworkException, ChatException {
+		
+		final ObjectContainer objContainer = new ObjectContainer();
+		
+		final PacketListener listener = new PacketListener() {
+			public void packetReceiver(Object data) {
+				if (!(data instanceof UserRegisterResponse)) {
+					logger.warning("got trash from server: " + data.getClass().getName());
+					return;
+				}
+				
+				objContainer.object = data;
+			}
+		};
+		
+		client.addPacketListener(listener);
+		
+		// send the registration packet and wait for response
+		try {
+			client.send(new UserRegisterRequest(name, password));
+			
+			synchronized (this) {
+				wait(ANSWER_TIMEOUT);
+			}
+			
+			// timeout
+			throw new ChatServerTimeoutException("chat server didn't respond in time");
+			
+		} catch (NotSerializableException e) {
+			e.printStackTrace();
+			System.exit(1);
+		} catch (InterruptedException e) {
+			// got packet
+		} finally {
+			client.removePacketListener(listener);
+		}
+		
+		final UserRegisterResponse response = (UserRegisterResponse) objContainer.object;
+		
+		if (response.isSucceed()) {
+			return;
+		}
+		
+		switch (response.getFailReason()) {
+			case RegisterRejectReason.IllegalUserName:
+				throw new IllegalUserNameException("user name '" + name + "' is illegal on this server");
+			case RegisterRejectReason.UserNameAlreadyInUse:
+				throw new UserNameAlreadyInUseException("user name '" + name + "' is already in use");
+			case RegisterRejectReason.WrongPassword:
+				throw new WrongPasswordExcepion("wrong password");
+				
+		}
+		
+	}
+
 	/**
 	 * @return the name
 	 */

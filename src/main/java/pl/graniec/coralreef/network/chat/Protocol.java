@@ -26,16 +26,16 @@
  * ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
  * POSSIBILITY OF SUCH DAMAGE.
  */
-package pl.graniec.coralreef.network.chat.packets;
+package pl.graniec.coralreef.network.chat;
 
 /**
  * @author Piotr Korzuszek <piotr.korzuszek@gmail.com>
  *
  */
-public final class RegisterRejectReason {
+public final class Protocol {
 	
-	public static final byte UserNameAlreadyInUse = 1;
-	public static final byte IllegalUserName      = 2;
-	public static final byte WrongPassword        = 3;
+	public static final int VERSION = 1;
 	
+	private Protocol() {
+	}
 }
