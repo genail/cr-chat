@@ -69,7 +69,7 @@ public class User {
 		// FIXME: Check if first packet is lost when I'll put a sleep here
 		
 		client.addPacketListener(new PacketListener() {
-			public void packetReceiver(Object data) {
+			public void packetReceived(Object data) {
 				handlePacket(data);
 			}
 		});

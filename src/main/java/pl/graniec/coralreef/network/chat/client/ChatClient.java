@@ -89,7 +89,7 @@ public class ChatClient {
 		final ObjectContainer objContainer = new ObjectContainer();
 
 		final PacketListener listener = new PacketListener() {
-			public void packetReceiver(Object data) {
+			public void packetReceived(Object data) {
 				
 				if (!(data instanceof ProtocolPacket)) {
 					logger.warning("Got trash from server: " + data.getClass().getName());
@@ -142,7 +142,7 @@ public class ChatClient {
 		final ObjectContainer objContainer = new ObjectContainer();
 		
 		final PacketListener listener = new PacketListener() {
-			public void packetReceiver(Object data) {
+			public void packetReceived(Object data) {
 				if (!(data instanceof UserRegisterResponse)) {
 					logger.warning("got trash from server: " + data.getClass().getName());
 					return;
